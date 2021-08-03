@@ -170,6 +170,7 @@ void ADS_device_init()
 
 			HAL_UART_Transmit(&huart2, ads_data, 27, 100);
 			// ONSDAG BÖRJA HÄR
+
 	}
 
 

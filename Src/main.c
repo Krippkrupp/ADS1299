@@ -35,8 +35,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define ADS_MIN_DELAY	1
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -126,11 +124,10 @@ int main(void)
     /* USER CODE END WHILE */
 	  send_uart("Wait for hodl..\n", huart2);
 	  hodl();
-//	  if(HAL_GPIO_ReadPin(ADS_DRDY_BUS, ADS_DRDY_PIN)==RESET)
-//	  {
+
 	  ADS_DOUT();
 	  ADS_Send();
-//	  }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

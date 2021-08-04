@@ -42,7 +42,7 @@ void ADS_DRDY_Wait(){
 	HAL_Delay(1); // TODO: is this needed?
 }
 
-
+// Test function, remove once all is good
 void ADS_device_init()
 {
 
@@ -171,7 +171,10 @@ void ADS_device_init()
 
 }
 
-
+/*
+ * 	\brief Powers on the ADS1299 in accordance to the correct power-up sequence.
+ * 	It will power up using internal reference, assuming internal clock @ 2.048 MHz
+ */
 void ADS_PowerOn()
 {
 	// wait for oscillator to warm up
@@ -182,18 +185,18 @@ void ADS_PowerOn()
 
 	/*************TEST***********/ // remove?
 	// wait for oscillator to warm up
-	HAL_Delay(1000);
+//	HAL_Delay(1000);
 
 	// testar RESET,  borde väl inte behövas?
-	ADS_RESET();
+//	ADS_RESET();
 	/*************END TEST**************/
 
 	// wait for oscillator to warm up
-	HAL_Delay(1000);
+//	HAL_Delay(1000);
 
 	ADS_SDATAC();
 
-	HAL_Delay(1000);
+//	HAL_Delay(1000);
 
 	//	Set internal reference
 	ADS_CONFIG3(ADS1299_CONFIG3_INT_REF_BUF_ENABLE);
@@ -208,9 +211,9 @@ void ADS_PowerOn()
 	ADS_CHANNEL(ADS_CH7SET_ADDR, ADS1299_CHN_POWER_OFF);
 	ADS_CHANNEL(ADS_CH8SET_ADDR, ADS1299_CHN_POWER_OFF);
 
-	ADS_ReadReg(ADS_CONFIG1_ADDR, 14);
+//	ADS_ReadReg(ADS_CONFIG1_ADDR, 14);
 
-//	ADS_START();
+	ADS_START();
 	HAL_Delay(500);
 	ADS_RDATAC();
 

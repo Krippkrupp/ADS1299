@@ -1,34 +1,36 @@
 /*
- * ADS1299_drivers.h
- *
- *  Created on: Jul 12, 2021
- *      Author: westr
+ *   \file ADS1299_driver.h
+ *  \brief Drivers for Texas Instruments ADS1299 with register and timing definitions, functions for different settings in which to run the ADS.
+ * 	The library was written for Department of Biomedicine at Lunds University.
+ *	\author Kristoffer Westring
+ *	\version 1.0
+ *	\date July 2021
  */
+
+/*
+ * 	Information:
+ * 	- SPI mode 1; CPOL=0, CPHA=1 are the correct settings. However for the board that I used, SPI mode 2; CPOL=1, CPHA=0 works.
+ *
+ * 	~ Things to add
+ * 	+	Support for multiple ADS
+ * 	+	Error handling (Almost none in place as of now)
+ * 	+	Add functions to calculate the conversions
+ * 	+
+ *
+ */
+
 
 #ifndef INC_ADS1299_DRIVERS_H_
 #define INC_ADS1299_DRIVERS_H_
 
 #include "main.h"
 
-// ta bort?
-UART_HandleTypeDef huart2;
-
-
-
-/*
- * 	Define GPIO
- */
-//#define ADS_SCLK GPIO.. etc..
 
 /*
  * 	User defined macros
  */
 #define		ADS_BAUDRATE		2.34375			/*!<	Needs to be entered by user depending on SPI settings. Unit: Mbit/s 	*/
-#define 	ADS_MASTER_CLK		ADS_BAUDRATE	/*!<	TODO: Is this correct? (No? Master CLK is probably CLK. Maybe remove this one, it may be redundant) Unit: MHz			*/
-
-
-#define		ADS_DMA				10	// remove! Only temporary
-
+#define 	ADS_MASTER_CLK		F_CLK			/*!<	TODO: Is this correct? (No? Master CLK is probably CLK. Maybe remove this one, it may be redundant) Unit: MHz			*/
 #define 	ADS_CS_BUS			GPIOD			/*!<	Chip Select (CS) bus for ADS1299. Needs to be configured according to user setup.	*/
 #define		ADS_CS_PIN			GPIO_PIN_6		/*!<	Chip Select (CS) pin for ADS1299. Needs to be configured according to user setup.	*/
 #define		ADS_DRDY_BUS		GPIOD			/*!<	Data Ready (DRDY) bus for ADS1299. Needs to be configured according to user setup.		*/
@@ -527,7 +529,8 @@ UART_HandleTypeDef huart2;
  * 	@ADS_FUNC
  * 	ADS1299 related functions
  */
-void ADS_PowerOn();
+void ADS_PowerOn();	// Remove?
+ void ADS_device_init();
 void ADS_Transmit(uint8_t* data, uint16_t size);
 void ADS_DRDY_Wait();
 void ADS_ReadReg(uint8_t baseAddr, uint8_t numOfReg);
@@ -556,7 +559,7 @@ void ADS_DOUT();
 void ADS_Send();
 //TODO: below for testing, remove when done
 void ADS_test();
-void ADS_device_init();
+
 void hodl();
 
 
@@ -585,11 +588,11 @@ typedef struct
 
 
 /*
- * 		User defined variable
+ * 		User defined variable. Change depend on your setup
  */
 SPI_HandleTypeDef hspi3;					/*!<	SPI channel for ADS1299	*/
 DMA_HandleTypeDef hdma_spi3_rx;				/*!<	SPI DMA for ADS1299	*/
-
+UART_HandleTypeDef huart2;					/*!<	For communicating over UART, not explicitly needed	*/
 
 /*
  * 	Global variables

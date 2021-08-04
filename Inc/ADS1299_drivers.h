@@ -125,9 +125,11 @@ UART_HandleTypeDef huart2;
 /*************	BIT MASK DEFINITIONS	********************/
 
 /********************************************
- *				CONFIG1						*
+ *				@CONFIG1					*
+ *	Configures daisy, clock and data rate	*
  ********************************************/
-#define		ADS1298_CONFIG1_RESET	0x96U		/*!<	Reset value for CONFIG1 register.	*/
+#define		ADS1298_CONFIG1_RESET		0x96U		/*!<	Reset value for CONFIG1 register.	*/
+#define		ADS1299_CONFIG1_RESERVED	(0b1001<<4)	/*!<	Reserved values for CONFIG1 register. Not that CONFIG1[3] is reserved as 0	*/
 
 /**
  *  \brief CONFIG1 DAISY_N bit mask definitions
@@ -160,11 +162,11 @@ UART_HandleTypeDef huart2;
 
 
 /********************************************************
- *						CONFIG2		    				*
+ *						@CONFIG2		    				*
  * This register configures the test signal generation  *
  ********************************************************/
- #define		ADS1298_CONFIG2_RESET	0xC0U		/*!<	Reset value for CONFIG2 register.	*/
-
+#define		ADS1298_CONFIG2_RESET		0xC0U		/*!<	Reset value for CONFIG2 register.	*/
+#define		ADS1299_CONFIG2_RESERVED 	(0b11<<6)	/*!<	Reserved values for CONFIG3 register. Note that CONFIG[5] & [3] is reserved to 0.	*/
 /**
  *  \brief CONFIG2 INT_CAL bit mask definitions
  *  Determines the source for the test signals.
@@ -193,11 +195,11 @@ UART_HandleTypeDef huart2;
 
 
 /********************************************************
- *						CONFIG3		    				*
+ *						@CONFIG3		    				*
  * Configures int. or ext. reference and BIAS operation *
  ********************************************************/
- #define		ADS1298_CONFIG3_RESET	0x60U		/*!<	Reset value for CONFIG3 register.	*/
-
+#define		ADS1299_CONFIG3_RESET		0x60U		/*!<	Reset value for CONFIG3 register.	*/
+#define		ADS1299_CONFIG3_RESERVED 	(0b11<<5)	/*!<	Reserved values for CONFIG3 register. Needs to be set	*/
 /**
  *  \brief CONFIG3 PD_REFBUF bit mask definitions.
  *	Controls if the internal voltage reference buffer should be enabled or disabled
@@ -323,6 +325,7 @@ UART_HandleTypeDef huart2;
 
 /**
  *  \brief CHNnSET SRB22 bit mask definitions
+ *  Default value 0<<3, _OPEN
  */
 #define 		ADS1299_CHN_SRB2_OPEN		(0<<3)		/*!<		*/
 #define 		ADS1299_CHN_SRB2_CLOSED		(1<<3)		/*!<		*/
@@ -480,7 +483,26 @@ UART_HandleTypeDef huart2;
 //#define ADS1299_GPIO_DATA
 
 
+/********************************************************
+ *					   @CONFIG4		    				*
+ *      Configures conversion mode and enables		    *
+ * 			     lead-off comparators		    		*
+ ********************************************************/
+ #define ADS1299_CONFIG4_RESET		0x00;		/*!<	Reset value for CONFIG4 register.	*/
 
+/**
+ *  \brief CONFIG4 SINGLE_SHOT bit mask definitions
+ *	Sets the conversion mode
+ */
+#define 		ADS1299_CONFIG4_SINGLE_SHOT_DISABLE		(0<<3)		/*!<	Continuous conversion mode	*/
+#define 		ADS1299_CONFIG4_SINGLE_SHOT_ENABLE		(1<<3)		/*!<	Single-shot mode	*/
+
+/**
+ *  \brief CONFIG4 PD_LOFF_COMP bit mask definitions
+ *	Powers down the lead-off comparators
+ */
+#define 		ADS1299_CONFIG4_PD_LOFF_COMP_DISABLE	(0<<1)		/*!<	Lead-off comparators disabled	*/
+#define 		ADS1299_CONFIG4_PD_LOFF_COMP_ENABLE		(1<<1)		/*!<	Lead-off comparators disabled	*/
 
 
 
@@ -522,10 +544,40 @@ void ADS_STOP();
 void ADS_RDATAC();
 void ADS_SDATAC();
 
+void ADS_CHANNEL(uint8_t CHN_ADDR, uint8_t SETTINGS);
+void ADS_CONFIG1(uint8_t bitmask);
+void ADS_CONFIG2(uint8_t bitmask);
+void ADS_CONFIG3(uint8_t bitmask);
+void ADS_CONFIG4(uint8_t bitmask);
+
 //TODO: below for testing, remove when done
 void ADS_test();
 void ADS_device_init();
 void hodl();
+
+
+
+// TODO: Are these needed for DOUT_t?
+//#define 	ADS_NUM_OF_CHANNELS 8		/*!<	Total amount of channels for ADS1299	*/
+//#define		ADS_CH_1			0		/*!<		*/
+
+/*
+ *	\brief Struct for received data from DOUT on the ADS1299
+ *	Read more about DOUT in ADS1299 datasheet (rev. SBAS499C) p.39
+ *	TODO: Maybe change to channel[8][3]; for easier handling?
+ */
+typedef struct
+{
+	uint8_t Status[3];					/*!<	24 bit status message	*/
+	uint8_t Channel_1[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_2[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_3[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_4[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_5[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_6[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_7[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+	uint8_t Channel_8[3];		/*!<	24 bit data holder for data sent from slave to master		*/
+}DOUT_t;
 
 
 /*

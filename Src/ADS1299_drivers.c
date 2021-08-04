@@ -45,19 +45,6 @@ void ADS_DRDY_Wait(){
 
 void ADS_device_init()
 {
-	/*****************TEMPORÄR TA BORT FRÅN HÄR***********************/
-//	penis:
-//	ADS_Transmit(&(uint8_t){0x96}, 1);
-//	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == RESET);
-//	HAL_Delay(500);
-//	goto penis;
-
-	/*****************TEMPORÄR TA BORT TILL HIT***********************/
-//	HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, SET);
-//	HAL_Delay(90000);
-	//if possible clear PWDN
-	// wait 1 ms
-	//if possible set PWDN
 
 	// wait for oscillator to warm up
 	HAL_Delay(1000);
@@ -149,6 +136,10 @@ void ADS_device_init()
 
 
 	uint8_t ads_data[27];
+	uint8_t ads_trash[27];
+	for(int i = 0; i < 27; i++){
+		ads_trash[i]=0;
+	}
 	while(1)
 	{
 		HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, SET);
@@ -166,7 +157,9 @@ void ADS_device_init()
 
 			ADS_DRDY_Wait();
 //			ADS_Transmit(&(uint8_t){0x00}, 27);
-			HAL_SPI_Receive(&hspi3, ads_data, 27, 100);
+//			HAL_SPI_Receive(&hspi3, ads_data, 27, 100);
+
+			HAL_SPI_TransmitReceive(&hspi3, ads_trash, ads_data, 27, 100);
 
 			HAL_UART_Transmit(&huart2, ads_data, 27, 100);
 			// ONSDAG BÖRJA HÄR
@@ -180,129 +173,44 @@ void ADS_device_init()
 
 }
 
-void ADS_test()
-{
-	HAL_Delay(500);
-
-	ADS_Transmit(&(uint8_t) {ADS_CMD_RESET}, 1);
-
-
-
-	HAL_Delay(500);	// Wait until power goes up completely (minimum 180ms)
-
-//	HAL_Delay(129);
-
-	//	ADS is waken up in RDATAC mode
-
-//	ADS_Transmit(&(uint8_t){ADS_CMD_SDATAC},1);
-
-//	ADS_Transmit(ADS_CMD_STOP, 1);
-
-//	ADS_WriteReg(ADS_CONFIG3_ADDR, 0xE0);
-
-	ADS_ReadReg(ADS_CONFIG1_ADDR, 14);
-
-//	ADS_WriteReg(ADS_CONFIG1_ADDR, 0x60);
-
-
-
-//	uint8_t temp;
-//	for(int i = 0; i < 20; i++)
-//	{
-//		ADS_DRDY_Wait();
-//		HAL_SPI_Receive(&hspi3, &temp, 1, 100);
-//		HAL_Delay(1);
-//	}
-	send_uart("jag kom hit\n", huart2);
-	HAL_Delay(900000);
-
-}
-
-
 
 void ADS_PowerOn()
 {
-	// Wait for power-up etc.
-	HAL_Delay(200);
+	// wait for oscillator to warm up
+	HAL_Delay(1000);
 
-	//	Issue reset pulse & wait for 18 T_CLK
+	// testar RESET,  borde väl inte behövas?
+	ADS_RESET();
 
-	ADS_Transmit(&(uint8_t) {ADS_CMD_RESET}, 1);
+	/*************TEST***********/ // remove?
+	// wait for oscillator to warm up
+	HAL_Delay(1000);
 
+	// testar RESET,  borde väl inte behövas?
+	ADS_RESET();
+	/*************END TEST**************/
 
+	// wait for oscillator to warm up
+	HAL_Delay(1000);
 
-	HAL_Delay(500);	// Wait until power goes up completely (minimum 180ms)
+	ADS_SDATAC();
 
-	//	ADS is waken up in RDATAC mode
+	HAL_Delay(1000);
 
-	ADS_Transmit(&(uint8_t){ADS_CMD_SDATAC},1);
-
-	// Using Internal Reference
-	ADS_WriteReg(ADS_CONFIG3_ADDR, 0xE0U);
-
-
-	ADS_WriteReg(ADS_CONFIG1_ADDR, 0x96U);
-
-	ADS_WriteReg(ADS_CONFIG2_ADDR, 0xC0U);
-
-	ADS_WriteReg(ADS_CH1SET_ADDR, 0x01);
-
-	ADS_WriteReg(ADS_CH2SET_ADDR, 0x81U);
-	ADS_WriteReg(ADS_CH3SET_ADDR, 0x81U);
-	ADS_WriteReg(ADS_CH4SET_ADDR, 0x81U);
-	ADS_WriteReg(ADS_CH5SET_ADDR, 0x81U);
-	ADS_WriteReg(ADS_CH6SET_ADDR, 0x81U);
-	ADS_WriteReg(ADS_CH7SET_ADDR, 0x81U);
-	ADS_WriteReg(ADS_CH8SET_ADDR, 0x81U);
-
-	ADS_Transmit(&(uint8_t){ADS_CMD_START}, 1);
-
-	ADS_Transmit(&(uint8_t){ADS_CMD_RDATAC}, 1);
-
-//	ADS_ReadReg(ADS_CONFIG1_ADDR, 0x17);
-
-	uint8_t temp;
-	ADS_ReadReg(ADS_CONFIG1_ADDR, 17);
-	HAL_Delay(2000);
-	for(int i = 0; i < 20; i++)
-	{
-		ADS_DRDY_Wait();
-		HAL_SPI_Receive(&hspi3, &temp, 1, 100);
-		HAL_Delay(200);
-	}
+	ADS_CHANNEL(ADS_CH1SET_ADDR, (ADS1299_CHN_POWER_ON | ADS1299_CHN_GAIN_2 | ADS1299_CHN_INPUT_NORMAL_ELECTRODE));
+	ADS_CHANNEL(ADS_CH2SET_ADDR, ADS1299_CHN_POWER_OFF);
+	ADS_CHANNEL(ADS_CH3SET_ADDR, ADS1299_CHN_POWER_OFF);
+	ADS_CHANNEL(ADS_CH4SET_ADDR, ADS1299_CHN_POWER_OFF);
+	ADS_CHANNEL(ADS_CH5SET_ADDR, ADS1299_CHN_POWER_OFF);
+	ADS_CHANNEL(ADS_CH6SET_ADDR, ADS1299_CHN_POWER_OFF);
+	ADS_CHANNEL(ADS_CH7SET_ADDR, ADS1299_CHN_POWER_OFF);
+	ADS_CHANNEL(ADS_CH8SET_ADDR, ADS1299_CHN_POWER_OFF);
 
 
 
-
-	uint8_t tmp[3];
-
-
-	 while (1)
-	  {
-		 ADS_DRDY_Wait();	// Waits for data ready
-		 HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, RESET);
-		 HAL_Delay(1);
-		 HAL_SPI_Receive(&hspi3, tmp, 3, 100);
-		 HAL_SPI_Receive(&hspi3, tmp, 3, 100);
-		 HAL_SPI_Receive(&hspi3, tmp, 3, 100);
-		 HAL_SPI_Receive(&hspi3, tmp, 3, 100);
-		 HAL_Delay(1);
-		 HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, SET);
-		 //		 ADS_Transmit(&(uint8_t){0}, 3);
-//		  ADS_Transmit(&(uint8_t){0}, 3);
-		  HAL_Delay(200);
-
-	  }
-
-
-	HAL_Delay(9999999);
+	HAL_Delay(99999);
 }
 
-//void ADS_ChannelSet(uint8_t channel, uint8_t PowerDown)
-//{
-//	ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | channel)}, 1);
-//
-//}
 
 
 /*
@@ -494,3 +402,44 @@ void ADS_CHANNEL(uint8_t CHN_ADDR, uint8_t SETTINGS)
 	ADS_WriteReg(CHN_ADDR, SETTINGS);
 }
 
+/*
+ * 	\brief Is used to initiate CONFIG3 register
+ * 	@param bitmask Use @CONFIG3 macros. Reserved values
+ * 	will automatically be set. Other bits will be initiated
+ * 	at 0 if not specified in bitmask
+ * 	Default value 0x60
+ */
+void ADS_CONFIG3(uint8_t bitmask)
+{
+	bitmask |= ADS1299_CONFIG3_RESERVED;
+	ADS_WriteReg(ADS_CONFIG3_ADDR, bitmask);
+}
+
+/*
+ * 	\brief Is used to initiate CONFIG2 register
+ * 	@param bitmask Use @CONFIG2 macros. Reserved values
+ * 	will automatically be set. Other bits  will be initiated
+ * 	at 0 if not specified in bitmask..
+ * 	Default value, 0xC0
+ */
+void ADS_CONFIG2(uint8_t bitmask)
+{
+	bitmask &= ~(0b101<<3);
+	bitmask |= ADS1299_CONFIG2_RESERVED;
+	ADS_WriteReg(ADS_CONFIG2_ADDR, bitmask);
+}
+
+/*
+ * 	\brief Is used to initiate CONFIG1 register
+ * 	@param bitmask Use @CONFIG1 macros. Reserved values
+ * 	will automatically be set. Other bits  will be initiated
+ * 	at 0 if not specified in bitmask..
+ * 	Default value, 0x96
+ */
+void ADS_CONFIG1(uint8_t bitmask)
+{
+	bitmask &= ~(0b1<<3);
+	bitmask |= ADS1299_CONFIG1_RESERVED;
+//	if(bitmask && 0b111 == 0b111) // TODO: Fix stuff like this?
+	ADS_WriteReg(ADS_CONFIG1_ADDR, bitmask);
+}

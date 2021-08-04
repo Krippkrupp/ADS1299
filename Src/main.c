@@ -110,176 +110,13 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-//  HAL_UART_Receive_DMA(&huart2, (uint8_t *) rxBuffer, UART_LEN);
-//  HAL_SPI_Receive_DMA(&hspi3, (uint8_t *) ADSBuffer, ADS_DMA);
-
-  // Temporär ****************************************
-  uint8_t ads_cmd;
-
-  send_uart("Ready!\n", huart2);
-
-//  HAL_Delay(9999999);
-
-
-
-
-  ads_cmd;
-
-//  while(1)
-//  {
-////	  HAL_SPI_Transmit(&hspi3, &ads_cmd, 1, 100);
-//	  ADS_Transmit((uint8_t[]){(0x17U)}, 1);
-//	  HAL_Delay(500);
-//  }
-
-
-
-//  HAL_Delay(500);	// Wait until power goes up completely (minimum 180ms)
   send_uart("Ready to fire..\n", huart2);
   while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == RESET);
 
 
+//  ADS_device_init();
+  ADS_PowerOn();
 
-  send_uart("starting..\n", huart2);
-
-
-  ADS_device_init();
-//  ADS_test();
-//  ADS_PowerOn();
-  goto hehe;
-
-
-
-  // Testar starta ADS
-//  HAL_Delay(100); // "Wait for Oscillator to wake up", Wait >T_POR for Power On Reset
-
-  //	Issue Reset Pulse
-  ads_cmd = ADS_CMD_RESET;
-  ADS_Transmit(&(uint8_t) {ADS_CMD_RESET}, 1);
-
-
-  //	Wait for 18 tCLKs
-  HAL_Delay(ADS_MIN_DELAY);	// 18*489= 8800 ms ~= 9µs, testar med 1ms och hoppas på att det fungerar
-  //	Send SDATAC Command
-  ads_cmd = ADS_CMD_SDATAC;
-  ADS_Transmit(&(uint8_t){ADS_CMD_SDATAC}, 1);
-
-  //Sätt N_CS låg (vilket den är från start)
-
-////////////////
-/*
-  uint8_t RREG_test = (ADS_CMD_RREG | ADS_CONFIG1_ADDR); //0b00100001; //(ADS_CMD_RREG | ADS_CONFIG1_ADDR);
-  ads_cmd = 22;
-
-
-  while(HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3));
-  HAL_SPI_Transmit(&hspi3, (uint8_t *) &RREG_test, 1, 100);
-  HAL_Delay(ADS_MIN_DELAY);
-
-  while(HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3));
-  HAL_SPI_Transmit(&hspi3, (uint8_t *) &ads_cmd, 1, 100);
-
-  */
-//  HAL_Delay(ADS_MIN_DELAY);
-
-
-//  return;
-
-
-//  HAL_Delay(500);
-//  while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==RESET);
-//  send_uart("wtf???\n", huart2);
-
-//  uint8_t RREGtest = (ADS_CMD_RREG | ADS_CH8SET_ADDR);
-//  ads_cmd = 7;
-//
-//  HAL_Delay(1);
-//  while(HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3));
-//  HAL_SPI_Transmit(&hspi3, (uint8_t *) &RREGtest, 1, 100);
-//
-//  delay_us(2);
-////  HAL_Delay(1);
-//  while(HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3));
-//  HAL_SPI_Transmit(&hspi3, (uint8_t *) &ads_cmd, 1, 100);
-//
-//
-//  return;
-  ////////////////7
-
-  // testar enl manual
-  HAL_Delay(ADS_MIN_DELAY); //480*2=1000 ns = 1µs, testar 1 ms
-  uint8_t WREG = (ADS_CMD_WREG | ADS_CONFIG3_ADDR);//0b01000011;
-  ads_cmd = 0xE0;
-
-  ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | ADS_CONFIG3_ADDR)}, 1);
-  ADS_Transmit(&ads_cmd, 1);
-
-  //	Write Certain Registers, Including Input Short
-  WREG = (ADS_CMD_WREG | ADS_CONFIG1_ADDR);
-  ads_cmd = 0x96;
-
-  ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | ADS_CONFIG1_ADDR)}, 1);
-  ADS_Transmit(&ads_cmd, 1);
-
-
-
-  WREG = (ADS_CMD_WREG | ADS_CONFIG2_ADDR);
-  ads_cmd = 0xC0;
-
-  ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | ADS_CONFIG2_ADDR)}, 1);
-  ADS_Transmit(&ads_cmd, 1);
-
-
-  //	Set All Channels to Input Short
-  // testar bara 1 kanal till input short
-
-  WREG = (ADS_CMD_WREG | ADS_CH1SET_ADDR);
-  ads_cmd = 0x01;
-  ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | ADS_CH1SET_ADDR)}, 1);
-  ADS_Transmit(&ads_cmd, 1);
-
-
-  // Activate Conversion
-  HAL_GPIO_WritePin(ADS_START_BUS, ADS_START_PIN, SET);
-  HAL_Delay(100);
-
-  // Put the Device Back in RDATAC Mode
-  ads_cmd = ADS_CMD_RDATAC;
-  ADS_Transmit(&(uint8_t){ADS_CMD_RDATAC}, 1);
-
-  // Activate a (1 mV x VREF / 2.4) Square-Wave Test Signal
-  ads_cmd = ADS_CMD_SDATAC;
-  ADS_Transmit(&(uint8_t){ADS_CMD_SDATAC}, 1);
-
-  // WREG CONFIG2 D0h
-  WREG = (ADS_CMD_WREG | ADS_CONFIG2_ADDR);
-  ads_cmd = 0xD0;
-
-  ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | ADS_CONFIG2_ADDR)}, 1);
-  ADS_Transmit(&ads_cmd, 1);
-
-  // WREG CHnSET 05h
-  WREG = (ADS_CMD_WREG | ADS_CH1SET_ADDR);
-  ads_cmd = 0x05;
-  ADS_Transmit(&(uint8_t){(ADS_CMD_WREG | ADS_CH1SET_ADDR)}, 1);
-  ADS_Transmit(&ads_cmd, 1);
-
-  //	RDATAC
-  ads_cmd = ADS_CMD_RDATAC;
-  HAL_Delay(1);
-  ADS_Transmit(&(uint8_t){ADS_CMD_RDATAC}, 1);
-
-  send_uart("\nFinished\n", huart2);
-
-  //	When using the START command to control conversions, hold the START pin low.
-//  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, RESET);
-//  HAL_SPI_Transmit(&hspi3, (uint8_t *) &ads_cmd, 1, 100);
-//  HAL_SPI_Transmit(&hspi3, (uint8_t) ADS_CMD_RDATAC, 1, 100);	//Nix..
-
-
-
-  uint8_t nada = 0;
-  hehe:
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -287,7 +124,13 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	  send_uart("Wait for hodl..\n", huart2);
+	  hodl();
+//	  if(HAL_GPIO_ReadPin(ADS_DRDY_BUS, ADS_DRDY_PIN)==RESET)
+//	  {
+	  ADS_DOUT();
+	  ADS_Send();
+//	  }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

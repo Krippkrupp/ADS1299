@@ -206,8 +206,8 @@ UART_HandleTypeDef huart2;
  *	Disabling REFBUF requires external reference on VREFP in order to operate.
  *	Default value, 0h, _DISABLED
  */
-#define		ADS1299_CONFIG3_INT_REF_BUF_DISABLE		(0<<7)		/!*<	Power-down internal reference buffer	*/
-#define		ADS1299_CONFIG3_INT_REF_BUF_ENABLE		(1<<7)		/!*<	Enable internal reference buffeR	*/
+#define		ADS1299_CONFIG3_INT_REF_BUF_DISABLE		(0<<7)		/*!<	Power-down internal reference buffer	*/
+#define		ADS1299_CONFIG3_INT_REF_BUF_ENABLE		(1<<7)		/*!<	Enable internal reference buffeR	*/
 
 /**
  *  \brief CONFIG3 BIAS_MEAS bit mask definitions.
@@ -306,8 +306,8 @@ UART_HandleTypeDef huart2;
  *	Controls the channel power.
  *	See ADS1299 (rev. SBAS499C) datasheet, p. 50 , for information.
  */
-#define 	ADS1299_CHN_POWER_ON		0			/*!<	Channel turned on.	*/
-#define 	ADS1299_CHN_POWER_OFF		1			/*!<	Channel turned off. Recommended to set MUX to input shorted.	*/
+#define 	ADS1299_CHN_POWER_ON		(0<<7)			/*!<	Channel turned on.	*/
+#define 	ADS1299_CHN_POWER_OFF		(1<<7)			/*!<	Channel turned off. Recommended to set MUX to input shorted.	*/
 
 
 /**
@@ -535,7 +535,7 @@ void ADS_RReg(uint8_t baseAddr);
 void ADS_WriteReg(uint8_t address, uint8_t val);
 
 
-//
+//	Commands
 void ADS_WAKEUP();
 void ADS_STANDBY();
 void ADS_RESET();
@@ -544,12 +544,16 @@ void ADS_STOP();
 void ADS_RDATAC();
 void ADS_SDATAC();
 
+// Writing to registers
 void ADS_CHANNEL(uint8_t CHN_ADDR, uint8_t SETTINGS);
 void ADS_CONFIG1(uint8_t bitmask);
 void ADS_CONFIG2(uint8_t bitmask);
 void ADS_CONFIG3(uint8_t bitmask);
 void ADS_CONFIG4(uint8_t bitmask);
 
+// Actions
+void ADS_DOUT();
+void ADS_Send();
 //TODO: below for testing, remove when done
 void ADS_test();
 void ADS_device_init();
@@ -587,8 +591,10 @@ SPI_HandleTypeDef hspi3;					/*!<	SPI channel for ADS1299	*/
 DMA_HandleTypeDef hdma_spi3_rx;				/*!<	SPI DMA for ADS1299	*/
 
 
-
-
+/*
+ * 	Global variables
+ */
+DOUT_t DOUT;		/*!<	For storing data ouput from ADS		*/
 
 // Todo: Fix. Add struct when errythang is gut
 char ADSBuffer[1024];

@@ -151,17 +151,15 @@ void ADS_device_init()
 		hodl();
 
 
+		ADS_DRDY_Wait();
 
-//		for(int i = 0; i<27; i++)
-//		{
+		ADS_DOUT();
+//		ADS_Send();
 
-			ADS_DRDY_Wait();
-//			ADS_Transmit(&(uint8_t){0x00}, 27);
-//			HAL_SPI_Receive(&hspi3, ads_data, 27, 100);
 
-			HAL_SPI_TransmitReceive(&hspi3, ads_trash, ads_data, 27, 100);
+//		HAL_SPI_TransmitReceive(&hspi3, ads_trash, ads_data, 27, 100);
 
-			HAL_UART_Transmit(&huart2, ads_data, 27, 100);
+//		HAL_UART_Transmit(&huart2, ads_data, 27, 100);
 			// ONSDAG BÖRJA HÄR
 
 	}
@@ -197,7 +195,11 @@ void ADS_PowerOn()
 
 	HAL_Delay(1000);
 
-	ADS_CHANNEL(ADS_CH1SET_ADDR, (ADS1299_CHN_POWER_ON | ADS1299_CHN_GAIN_2 | ADS1299_CHN_INPUT_NORMAL_ELECTRODE));
+	//	Set internal reference
+	ADS_CONFIG3(ADS1299_CONFIG3_INT_REF_BUF_ENABLE);
+
+	// Temporary for testing
+	ADS_CHANNEL(ADS_CH1SET_ADDR, (ADS1299_CHN_POWER_ON | ADS1299_CHN_GAIN_1 | ADS1299_CHN_INPUT_NORMAL_ELECTRODE));
 	ADS_CHANNEL(ADS_CH2SET_ADDR, ADS1299_CHN_POWER_OFF);
 	ADS_CHANNEL(ADS_CH3SET_ADDR, ADS1299_CHN_POWER_OFF);
 	ADS_CHANNEL(ADS_CH4SET_ADDR, ADS1299_CHN_POWER_OFF);
@@ -206,9 +208,13 @@ void ADS_PowerOn()
 	ADS_CHANNEL(ADS_CH7SET_ADDR, ADS1299_CHN_POWER_OFF);
 	ADS_CHANNEL(ADS_CH8SET_ADDR, ADS1299_CHN_POWER_OFF);
 
+	ADS_ReadReg(ADS_CONFIG1_ADDR, 14);
 
+//	ADS_START();
+	HAL_Delay(500);
+	ADS_RDATAC();
 
-	HAL_Delay(99999);
+//	HAL_Delay(99999);
 }
 
 
@@ -234,14 +240,9 @@ void ADS_ReadReg(uint8_t baseAddr, uint8_t numOfReg)
 	ADS_Transmit(&(uint8_t){numOfReg-1}, 1);
 
 
-	// test
-//	ADS_DRDY_Wait();
-//	uint8_t temp[numOfReg];
-//	HAL_SPI_Receive(&hspi3, temp, numOfReg, 100);
 
-	//end test
 
-	//	TODO: Ta bort när denna är helt ok!
+	//	TODO: Ta bort när denna är helt ok! Nä.... varför skulle jag göra det? Vi vill ju se resultatet, dumbom
 	for(int i = 0; i < numOfReg; i++)
 	{
 		ADS_DRDY_Wait();
@@ -399,7 +400,21 @@ void ADS_SDATAC()
  */
 void ADS_CHANNEL(uint8_t CHN_ADDR, uint8_t SETTINGS)
 {
+	if(SETTINGS && (ADS1299_CHN_POWER_OFF)){SETTINGS |= ADS1299_CHN_INPUT_INPUT_SHORTED;}
 	ADS_WriteReg(CHN_ADDR, SETTINGS);
+}
+
+/*
+ * 	\brief Is used to initiate CONFIG3 register
+ * 	@param bitmask Use @CONFIG4 macros. Reserved values
+ * 	will automatically be set. Other bits will be initiated
+ * 	at 0 if not specified in bitmask
+ * 	Default value 0x60
+ */
+void ADS_CONFIG4(uint8_t bitmask)
+{
+	bitmask &= ~(0b11110101);	// All but CONFIG4[3] & [1] are reserved to 0
+	ADS_WriteReg(ADS_CONFIG4_ADDR, bitmask);
 }
 
 /*
@@ -413,6 +428,7 @@ void ADS_CONFIG3(uint8_t bitmask)
 {
 	bitmask |= ADS1299_CONFIG3_RESERVED;
 	ADS_WriteReg(ADS_CONFIG3_ADDR, bitmask);
+	HAL_Delay(100);	//	Wait for internal reference to settle. TODO: Find out how much time that takes
 }
 
 /*
@@ -442,4 +458,37 @@ void ADS_CONFIG1(uint8_t bitmask)
 	bitmask |= ADS1299_CONFIG1_RESERVED;
 //	if(bitmask && 0b111 == 0b111) // TODO: Fix stuff like this?
 	ADS_WriteReg(ADS_CONFIG1_ADDR, bitmask);
+}
+
+void ADS_DOUT()
+{
+	HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, SET);
+	HAL_Delay(100);
+	HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, RESET);
+
+	uint8_t temp[27];	// Temporary storage
+	ADS_DRDY_Wait();	// Wait for DRDY to go active
+
+	HAL_SPI_TransmitReceive(&hspi3, (uint8_t[27]){0}, temp, 27, 100);	// Receive data by sending 216 SCLKs
+
+	// Handle data
+	for(int i = 0; i < 3; i++)
+	{
+		DOUT.Status[i] = temp[i];
+		DOUT.Channel_1[i] = temp[3*1+i];
+		DOUT.Channel_2[i] = temp[3*2+i];
+		DOUT.Channel_3[i] = temp[3*3+i];
+		DOUT.Channel_4[i] = temp[3*4+i];
+		DOUT.Channel_5[i] = temp[3*5+i];
+		DOUT.Channel_6[i] = temp[3*6+i];
+		DOUT.Channel_7[i] = temp[3*7+i];
+		DOUT.Channel_8[i] = temp[3*8+i];
+	}
+}
+
+void ADS_Send()
+{
+	send_uart("Channel 1: ", huart2);
+	HAL_UART_Transmit(&huart2, DOUT.Channel_1, 3, 100);
+	send_uart("\n", huart2);
 }

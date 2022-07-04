@@ -109,23 +109,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 //  __disable_irq();
 //  NVIC_DisableIRQ(EXTI3_IRQn);
-//  while(1){
-//	  send_uart("Start me up!\n", huart2);
-//	  send_uart("Ready to fire..\n", huart2);
-//  }
-//  while (1)
-//  {
-//	  HAL_UART_Transmit(&huart2, (uint8_t[1]){0x12}, 1, 1000);
-//  }
-//
-
-//  while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == RESET);
 
 
-
-//  ADS_device_init();
-//  ADS_PowerOn();
-  ADSPowerOnTest();
+  ADSPowerOnTest();		// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
+  //ADS_PowerOn();			// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
 
 
   /* USER CODE END 2 */

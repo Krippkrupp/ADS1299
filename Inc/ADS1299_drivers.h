@@ -518,14 +518,13 @@
  * 	@ADS_FUNC
  * 	ADS1299 related functions
  */
-void ADS_PowerOn();	// Remove?
-void ADSPowerOnTest();
-void ADS_device_init();
-void ADS_Transmit(uint8_t* data, uint16_t size);
-void ADS_DRDY_Wait();
-void ADS_ReadReg(uint8_t baseAddr, uint8_t numOfReg);
-void ADS_RReg(uint8_t baseAddr);
-void ADS_WriteReg(uint8_t address, uint8_t val);
+void ADS_PowerOn();										/*!<	Powers on with normal electrod on channel 1.	*/
+void ADSPowerOnTest();									/*!<	Powers on with test signal on CH1, this is used for testing the hardware		*/
+void ADS_Transmit(uint8_t* data, uint16_t size);		/*!<	Transmits data to ADS	*/
+void ADS_DRDY_Wait();									/*!<	Waits for DRDY to go active	*/
+void ADS_ReadReg(uint8_t baseAddr, uint8_t numOfReg);	/*!<	Reads value of register(s)  */
+void ADS_RReg(uint8_t baseAddr);						/*!<	Reads value of single register */
+void ADS_WriteReg(uint8_t address, uint8_t val);		/*!<	Writes value to single register */
 
 
 //	Commands

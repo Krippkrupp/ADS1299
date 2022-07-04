@@ -102,33 +102,45 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_SPI3_Init();
   MX_USART2_UART_Init();
   MX_TIM1_Init();
+  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
+//  __disable_irq();
+//  NVIC_DisableIRQ(EXTI3_IRQn);
+//  while(1){
+//	  send_uart("Start me up!\n", huart2);
+//	  send_uart("Ready to fire..\n", huart2);
+//  }
+//  while (1)
+//  {
+//	  HAL_UART_Transmit(&huart2, (uint8_t[1]){0x12}, 1, 1000);
+//  }
+//
 
-  send_uart("Ready to fire..\n", huart2);
-  while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == RESET);
+//  while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == RESET);
+
 
 
 //  ADS_device_init();
-  ADS_PowerOn();
+//  ADS_PowerOn();
+  ADSPowerOnTest();
+
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint8_t temp[27];	// Temporary storage
+//  __enable_irq();
   while (1)
   {
     /* USER CODE END WHILE */
-	  send_uart("Wait for hodl..\n", huart2);
-	  hodl();
-
-	  ADS_DOUT();
-	  ADS_Send();
 
     /* USER CODE BEGIN 3 */
+	  ADS_DOUT();
+	  ADS_Plot();
   }
   /* USER CODE END 3 */
 }
@@ -276,7 +288,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -375,7 +387,13 @@ void delay_us (uint16_t us)
 	while (__HAL_TIM_GET_COUNTER(&htim1) < us);  // wait for the counter to reach the us input in the parameter
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+//  ADS_DRDY_GPIO_EXTI(GPIO_Pin);
+  UNUSED(GPIO_Pin);
 
+}
 
 
 /* USER CODE END 4 */

@@ -37,7 +37,7 @@
 #define		ADS_DRDY_PIN		GPIO_PIN_3		/*!<	Data Ready (DRDY) pin for ADS1299. Needs to be configured according to user setup.	*/
 #define		ADS_START_BUS		GPIOD			/*!<	START bus for ADS1299. Needs to be configured according to user setup.	*/
 #define		ADS_START_PIN		GPIO_PIN_7		/*!<	START pin for ADS1299. Needs to be configured according to user setup.	*/
-
+#define 	ADS_SPI				hspi3			/*!<	SPI peripheral for ADS1299. Needs to be configured according to user setup.	*/
 
 /*
  * 	@ADS_TIME
@@ -510,27 +510,17 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*******************************************************************************************************************************************************************/
+/************************************************					FUNCTIONS					********************************************************************/
+/*******************************************************************************************************************************************************************/
 
 /*
  * 	@ADS_FUNC
  * 	ADS1299 related functions
  */
 void ADS_PowerOn();	// Remove?
- void ADS_device_init();
+void ADSPowerOnTest();
+void ADS_device_init();
 void ADS_Transmit(uint8_t* data, uint16_t size);
 void ADS_DRDY_Wait();
 void ADS_ReadReg(uint8_t baseAddr, uint8_t numOfReg);
@@ -553,10 +543,12 @@ void ADS_CONFIG1(uint8_t bitmask);
 void ADS_CONFIG2(uint8_t bitmask);
 void ADS_CONFIG3(uint8_t bitmask);
 void ADS_CONFIG4(uint8_t bitmask);
-
+void ADS_BIAS_SENS(uint8_t SENSN, uint8_t SENSP);
 // Actions
 void ADS_DOUT();
+
 void ADS_Send();
+void ADS_Plot();
 //TODO: below for testing, remove when done
 void ADS_test();
 
@@ -590,18 +582,19 @@ typedef struct
 /*
  * 		User defined variable. Change depend on your setup
  */
-SPI_HandleTypeDef hspi3;					/*!<	SPI channel for ADS1299	*/
-DMA_HandleTypeDef hdma_spi3_rx;				/*!<	SPI DMA for ADS1299	*/
-UART_HandleTypeDef huart2;					/*!<	For communicating over UART, not explicitly needed	*/
+extern SPI_HandleTypeDef hspi3;					/*!<	SPI channel for ADS1299	*/
+extern DMA_HandleTypeDef hdma_spi3_rx;				/*!<	SPI DMA for ADS1299	*/
+extern UART_HandleTypeDef huart2;					/*!<	For communicating over UART, not explicitly needed	*/
 
 /*
  * 	Global variables
  */
-DOUT_t DOUT;		/*!<	For storing data ouput from ADS		*/
+extern DOUT_t DOUT;		/*!<	For storing data ouput from ADS		*/
 
 // Todo: Fix. Add struct when errythang is gut
-char ADSBuffer[1024];
+extern char ADSBuffer[1024];
+void ADS_DRDY_GPIO_EXTI(uint16_t ADS_N_DRDY_PIN);
 
-
+//extern uint32_t cCounter;
 
 #endif /* INC_ADS1299_DRIVERS_H_ */

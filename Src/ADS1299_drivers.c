@@ -52,10 +52,13 @@ void ADS_DRDY_Wait(){
  */
 void ADS_PowerOn()
 {
+	//	Disable interrupts on DRDY
+	NVIC_DisableIRQ(EXTI3_IRQn);
 	// wait for oscillator to warm up
 	HAL_Delay(1000);
 	// Reset for good measures
 	ADS_RESET();
+	//	Stop continous data when settings registers
 	ADS_SDATAC();
 	ADS_CONFIG1(0b11010000 | ADS1299_CONFIG1_DATA_RATE_FMOD_DIV_1024); // OBS! Config1 needs to be done first as this resets all other registers
 	ADS_CONFIG2(0b11010100);
@@ -66,6 +69,8 @@ void ADS_PowerOn()
 	ADS_START();
 	HAL_Delay(500);
 	ADS_RDATAC();
+	//	Enable IRQ for reading data
+	NVIC_EnableIRQ(EXTI3_IRQn);
 }
 
 /*
@@ -75,6 +80,8 @@ void ADS_PowerOn()
  */
 void ADSPowerOnTest()
 {
+	// Disable interrupts on DRDY
+	NVIC_DisableIRQ(EXTI3_IRQn);
 	// wait for oscillator to warm up
 	HAL_Delay(1000);
 	ADS_RESET();
@@ -87,6 +94,8 @@ void ADSPowerOnTest()
 	ADS_START();
 	HAL_Delay(500);
 	ADS_RDATAC();
+	//	Enable IRQ for reading data
+	NVIC_EnableIRQ(EXTI3_IRQn);
 }
 
 
@@ -351,7 +360,7 @@ void ADS_DOUT()
 /*	static uint32_t cCounter = 0;
 	cCounter++;*/
 	uint8_t temp[27];	// Temporary storage
-	ADS_DRDY_Wait();	// Wait for DRDY to go active
+	//ADS_DRDY_Wait();	// Wait for DRDY to go active
 
 	HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, RESET);
 
@@ -393,10 +402,7 @@ void ADS_Plot()
 
 	HAL_UART_Transmit(&huart2, (uint8_t[]){0xff, 0xff}, 2, 100); // Start markers
 	HAL_UART_Transmit(&huart2, DOUT.Channel_1, 3, 100);
-	//HAL_UART_Transmit(&huart2, tmp, 3, 100);
-//	HAL_UART_Transmit(&huart2, (uint8_t[]){'\n'}, 1, 100);
 	HAL_UART_Transmit(&huart2, (uint8_t[]){'\r'}, 1, 100);
-
 //	send_uart("\n", huart2);	// Only for looking at the data in YAT. Should not be used for plotting in python.
 }
 

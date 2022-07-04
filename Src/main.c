@@ -102,18 +102,21 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI3_Init();
   MX_USART2_UART_Init();
   MX_TIM1_Init();
-  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
-//  __disable_irq();
-//  NVIC_DisableIRQ(EXTI3_IRQn);
+  //__disable_irq();
+
 
 
   ADSPowerOnTest();		// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
   //ADS_PowerOn();			// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
 
+
+
+  //__enable_irq();
 
   /* USER CODE END 2 */
 
@@ -126,8 +129,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  ADS_DOUT();
-	  ADS_Plot();
+	  /*ADS_DOUT();
+	  ADS_Plot();*/
   }
   /* USER CODE END 3 */
 }
@@ -337,7 +340,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ADS_N_DRDY_Pin */
   GPIO_InitStruct.Pin = ADS_N_DRDY_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ADS_N_DRDY_GPIO_Port, &GPIO_InitStruct);
 
@@ -347,6 +350,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 }
 
@@ -377,8 +384,8 @@ void delay_us (uint16_t us)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* Prevent unused argument(s) compilation warning */
-//  ADS_DRDY_GPIO_EXTI(GPIO_Pin);
-  UNUSED(GPIO_Pin);
+  ADS_DRDY_GPIO_EXTI(GPIO_Pin);
+  //UNUSED(GPIO_Pin);
 
 }
 

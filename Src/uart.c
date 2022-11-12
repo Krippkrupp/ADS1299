@@ -12,7 +12,7 @@ void send_uart(char *string, UART_HandleTypeDef huart)
 	if(huart.Instance == USART2){
 		HAL_UART_Transmit(&huart2, (uint8_t *) string, strlen(string), 2000);
 	}else if(huart.Instance == USART3){
-		HAL_UART_Transmit(&huart3, (uint8_t *) string, strlen(string), 2000);
+		//HAL_UART_Transmit(&huart3, (uint8_t *) string, strlen(string), 2000);
 	}
 }
 

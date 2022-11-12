@@ -109,10 +109,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   //__disable_irq();
 
+//  NVIC_DisableIRQ(EXTI3_IRQn);
 
 
-  ADSPowerOnTest();		// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
-  //ADS_PowerOn();			// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
+//  ADSPowerOnTest();		// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
+  ADS_PowerOn();			// Works 2022-07-04, feed 5V-pin on breakout board with 3V3!!
 
 
 

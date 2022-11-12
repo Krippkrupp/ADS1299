@@ -8,6 +8,8 @@
 #include "main.h"
 // External variables
 DOUT_t DOUT;
+int plotCounter = 0;
+uint8_t PlotBuffer[1024][3];
 /*
  * \brief Temporary functions only for when Stoffe is debugging. Should be removed.
  */
@@ -60,6 +62,11 @@ void ADS_PowerOn()
 	ADS_RESET();
 	//	Stop continous data when settings registers
 	ADS_SDATAC();
+
+	//	Example settings for using channel 1 in normal electrode mode
+	/**	In order to use the ADS, change the following function calls
+	 * 	in accordance to your use case
+	 */
 	ADS_CONFIG1(0b11010000 | ADS1299_CONFIG1_DATA_RATE_FMOD_DIV_1024); // OBS! Config1 needs to be done first as this resets all other registers
 	ADS_CONFIG2(0b11010100);
 	ADS_CONFIG3(0b11101100);
@@ -381,7 +388,11 @@ void ADS_DOUT()
 	}
 
 	HAL_GPIO_WritePin(ADS_CS_BUS, ADS_CS_PIN, SET);
-
+	if(temp[3] != 0 || temp[4] != 0 || temp[5] != 0)
+	{
+		temp[0]=2;
+//		HAL_Delay(1);
+	}
 }
 
 void ADS_Send()
@@ -406,6 +417,17 @@ void ADS_Plot()
 //	send_uart("\n", huart2);	// Only for looking at the data in YAT. Should not be used for plotting in python.
 }
 
+void ADS_bufferplot()
+{
+
+	HAL_UART_Transmit(&huart2, (uint8_t[]){0xff, 0xff, 0xff, 0xff}, 4, 100); // Start markers
+	for(int i = 0; i < BUFFER_SIZE; i++){
+		HAL_UART_Transmit(&huart2, PlotBuffer[i], 3, 100);
+	}
+	HAL_UART_Transmit(&huart2, (uint8_t[]){'\r'}, 1, 100);
+//	send_uart("\n", huart2);	// Only for looking at the data in YAT. Should not be used for plotting in python.
+}
+
 /*
  * 	\brief Should be called every 1/(2 kHz)
  * 	This can also control other
@@ -414,6 +436,17 @@ void ADS_DRDY_GPIO_EXTI(uint16_t ADS_N_DRDY_PIN)
 {
 	if(ADS_N_DRDY_PIN == ADS_DRDY_PIN){
 		ADS_DOUT();
-	    ADS_Plot();
+		PlotBuffer[plotCounter][0]=DOUT.Channel_1[0];
+		PlotBuffer[plotCounter][1]=DOUT.Channel_1[1];
+		PlotBuffer[plotCounter][2]=DOUT.Channel_1[2];
+		plotCounter++;
+		//	Add to buffer (only if you want to plot to python application)
+		if(plotCounter == BUFFER_SIZE){
+			ADS_bufferplot();
+			plotCounter=0;
+		}
+
+//	    ADS_Plot();
+
 	}
 }

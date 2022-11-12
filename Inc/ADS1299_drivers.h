@@ -39,6 +39,7 @@
 #define		ADS_START_PIN		GPIO_PIN_7		/*!<	START pin for ADS1299. Needs to be configured according to user setup.	*/
 #define 	ADS_SPI				hspi3			/*!<	SPI peripheral for ADS1299. Needs to be configured according to user setup.	*/
 
+#define 	BUFFER_SIZE			100				/*!<  	Buffer plot size, used to plot in python	*/
 /*
  * 	@ADS_TIME
  * 	Timing requirement macros. Please note, these are defined assuming 2.7 V <= DVDD <= 3.6 V. TODO: Add macros for other DVDD voltages
@@ -548,6 +549,8 @@ void ADS_DOUT();
 
 void ADS_Send();
 void ADS_Plot();
+void ADS_bufferplot();
+
 //TODO: below for testing, remove when done
 void ADS_test();
 
@@ -592,6 +595,8 @@ extern DOUT_t DOUT;		/*!<	For storing data ouput from ADS		*/
 
 // Todo: Fix. Add struct when errythang is gut
 extern char ADSBuffer[1024];
+extern uint8_t PlotBuffer[1024][3];
+extern int plotCounter;
 void ADS_DRDY_GPIO_EXTI(uint16_t ADS_N_DRDY_PIN);
 
 //extern uint32_t cCounter;
